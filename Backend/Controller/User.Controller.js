@@ -1,5 +1,7 @@
 import { User } from "../Model/User.Model.js";
-
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { verifyEmail } from "../VerifyEmail/verifyEmail.js";
 export const register = async (req, res) => {
   try {
     const { firstname, lastname, email, password } = req.body;
@@ -16,21 +18,26 @@ export const register = async (req, res) => {
         .status(400)
         .json({ success: false, Message: "User already exist!" });
     }
+    const hashpassword = await bcrypt.hash(password, 10);
 
     const newUser = await User.create({
       firstname,
       lastname,
       email,
-      password,
+      password: hashpassword,
     });
+    const token = jwt.sign({ id: newUser._id }, process.env.SECRET_KEY, {
+      expiresIn: "10m",
+    });
+    verifyEmail(token, email);
+    newUser.token = token;
     await newUser.save();
-    return res
-      .status(201)
-      .json({
-        success: true,
-        Message: "User has been created!",
-        user: newUser,
-      });
+
+    return res.status(201).json({
+      success: true,
+      Message: "User has been created!",
+      user: newUser,
+    });
   } catch (error) {
     res.status(500).json({ success: false, Message: error.message });
   }
