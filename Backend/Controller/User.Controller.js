@@ -42,3 +42,8 @@ export const register = async (req, res) => {
     res.status(500).json({ success: false, Message: error.message });
   }
 };
+
+export const verify = async (req, res) => {
+  try {
+  } catch (error) {}
+};
