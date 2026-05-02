@@ -1,13 +1,13 @@
 import mongoose, { Schema } from "mongoose";
 
-const SessionSchema = await Schema(
+const SessionSchema = new Schema(
   {
     userid: {
       type: Schema.Types.ObjectId,
-      ref="User"
+      ref: "User",
     },
   },
   { timestamps: true },
 );
 
-export const Session = mongoose.model("Session",SessionSchema)
+export const Session = mongoose.model("Session", SessionSchema);

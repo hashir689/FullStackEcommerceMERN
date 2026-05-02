@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { verifyEmail } from "../VerifyEmail/verifyEmail.js";
 import { json } from "express";
+import { Session } from "../Model/Session.Model.js";
 
 export const register = async (req, res) => {
   try {
@@ -138,11 +139,26 @@ export const login = async (req, res) => {
 
     user.isLoggedIn = true;
     await user.save();
+    const usersession = await Session.findOne({ userid: user.id });
+    if (usersession) {
+      await Session.deleteOne({ userid: user.id });
+    }
 
-    return res
-      .status(200)
-      .json({ success: true, message: "Login Successfuly" });
+    await Session.create({ userid: user.id });
+    return res.status(200).json({
+      success: true,
+      message: "Login Successfuly",
+      user,
+      accessToken,
+      refreshToken,
+    });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
+};
+
+export const logout = async (req, res) => {
+  try {
+    const userid = req.id;
+  } catch (error) {}
 };
