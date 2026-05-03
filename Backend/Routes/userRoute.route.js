@@ -5,10 +5,11 @@ import {
   reVerify,
   verify,
 } from "../Controller/User.Controller.js";
+import { isAuthenticated } from "../Middleware/isAuthenticated.js";
 
 const router = express.Router();
 router.post("/register", register);
 router.post("/verify", verify);
 router.post("/reVerify", reVerify);
-router.post("/login", login);
+router.post("/login", isAuthenticated, login);
 export default router;
