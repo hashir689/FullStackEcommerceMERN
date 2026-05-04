@@ -1,9 +1,9 @@
 import jwt from "jsonwebtoken";
-import { User } from "../Model/User.Model";
+import { User } from "../Model/User.Model.js";
 export const isAuthenticated = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
-    if (!authHeader.startswith("Bearer ") || !authHeader) {
+    if (!authHeader.startsWith("Bearer ") || !authHeader) {
       return res.status(400).json({
         success: false,
         Message: "token is invalid",
@@ -12,13 +12,15 @@ export const isAuthenticated = async (req, res, next) => {
 
     const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
-    const user = User.findById(decoded.id);
+    const user = await User.findById(decoded.id);
+
     if (!user) {
       return res.status(400).json({
         success: false,
         Message: "User not found",
       });
     }
+
     req.id = user._id;
     next();
   } catch (error) {

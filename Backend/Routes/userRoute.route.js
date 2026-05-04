@@ -1,6 +1,7 @@
 import express from "express";
 import {
   login,
+  logout,
   register,
   reVerify,
   verify,
@@ -11,5 +12,6 @@ const router = express.Router();
 router.post("/register", register);
 router.post("/verify", verify);
 router.post("/reVerify", reVerify);
-router.post("/login", isAuthenticated, login);
+router.post("/login", login);
+router.post("/logout", isAuthenticated, logout);
 export default router;

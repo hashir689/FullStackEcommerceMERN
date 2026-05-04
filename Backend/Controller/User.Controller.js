@@ -139,12 +139,12 @@ export const login = async (req, res) => {
 
     user.isLoggedIn = true;
     await user.save();
-    const usersession = await Session.findOne({ userid: user.id });
+    const usersession = await Session.findOne({ userid: user._id });
     if (usersession) {
-      await Session.deleteOne({ userid: user.id });
+      await Session.deleteOne({ userid: user._id });
     }
 
-    await Session.create({ userid: user.id });
+    await Session.create({ userid: user._id });
     return res.status(200).json({
       success: true,
       message: "Login Successfuly",
@@ -160,5 +160,13 @@ export const login = async (req, res) => {
 export const logout = async (req, res) => {
   try {
     const userid = req.id;
-  } catch (error) {}
+
+    await Session.deleteMany({ userid });
+    await User.findByIdAndUpdate(userid, { isLoggedIn: false });
+    return res
+      .status(200)
+      .json({ success: true, Message: "user logout successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, Message: error.message });
+  }
 };
