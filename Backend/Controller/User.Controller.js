@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { verifyEmail } from "../VerifyEmail/verifyEmail.js";
 import { json } from "express";
 import { Session } from "../Model/Session.Model.js";
+import { OTPVerificationMail } from "../VerifyEmail/OTPVerification.js";
 
 export const register = async (req, res) => {
   try {
@@ -168,5 +169,87 @@ export const logout = async (req, res) => {
       .json({ success: true, Message: "user logout successfully" });
   } catch (error) {
     res.status(500).json({ success: false, Message: error.message });
+  }
+};
+
+export const ForgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "User not Found",
+      });
+    }
+    const OTP = Math.floor(100000 + Math.random() * 900000);
+    const OTPExpiry = Date.now() + 10 * 60 * 1000;
+    user.otp = OTP;
+    user.otpExpiry = OTPExpiry;
+    await user.save();
+    await OTPVerificationMail(OTP, email);
+    return res.status(200).json({
+      success: true,
+      message: "OTP has been sent to Mail",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const VerifyOTP = async (req, res) => {
+  try {
+    const { otp } = req.body;
+    const email = req.params.email;
+
+    if (!opt) {
+      return res.status(400).json({
+        success: false,
+        Message: "OPT is required",
+      });
+    }
+
+    const user = User.findById({ email });
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        Message: "User not Found",
+      });
+    }
+    if (!user.otp || !user.otpExpiry) {
+      return res.status(400).json({
+        success: false,
+        Message: "OPT not generated",
+      });
+    }
+    if (user.otpExpiry < new Date(Date.now())) {
+      return res.status(400).json({
+        success: false,
+        Message: "OTP has been expired",
+      });
+    }
+    if (otp !== user.otp) {
+      return res.status(400).json({
+        success: false,
+        Message: "OTP is invalid",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      Message: "OTP has been Verified",
+    });
+
+    user.otp = null;
+    user.otpExpiry = null;
+    await user.save();
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      Message: error.message,
+    });
   }
 };
