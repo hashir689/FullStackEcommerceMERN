@@ -253,3 +253,41 @@ export const VerifyOTP = async (req, res) => {
     });
   }
 };
+
+export const changePassword = async (req, res) => {
+  try {
+    const { password, confirmPassword } = req.body;
+    const { email } = req.params;
+    if (!password || !confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Field must required",
+      });
+    }
+    const user = User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must match",
+      });
+    }
+    const hashPassword = await bcrypt.hash(password, 10);
+    user.password = hashPassword;
+    await user.save();
+    res.status(200).json({
+      success: true,
+      message: "Your password has been changed",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
