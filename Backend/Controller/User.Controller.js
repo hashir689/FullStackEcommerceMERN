@@ -205,14 +205,15 @@ export const VerifyOTP = async (req, res) => {
     const { otp } = req.body;
     const email = req.params.email;
 
-    if (!opt) {
+    if (!otp) {
       return res.status(400).json({
         success: false,
         Message: "OPT is required",
       });
     }
 
-    const user = User.findById({ email });
+    const user = await User.findOne({ email });
+
     if (!user) {
       return res.status(400).json({
         success: false,
@@ -264,7 +265,7 @@ export const changePassword = async (req, res) => {
         message: "Field must required",
       });
     }
-    const user = User.findOne({ email });
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({
         success: false,
@@ -283,6 +284,21 @@ export const changePassword = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Your password has been changed",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = User.find();
+    return res.status(200).json({
+      success: true,
+      users,
     });
   } catch (error) {
     return res.status(500).json({
