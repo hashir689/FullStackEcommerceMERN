@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 const VerifyEmail = () => {
-  const token = useParams();
+  const { token } = useParams();
   const [status, setstatus] = useState("Verifying...");
   const navigate = useNavigate();
   const verifyEmail = async () => {
@@ -17,6 +17,8 @@ const VerifyEmail = () => {
           },
         },
       );
+      console.log(token + " this is my token");
+
       if (res.data.success) {
         setstatus("Email has been verified");
         setTimeout(() => {
@@ -24,7 +26,7 @@ const VerifyEmail = () => {
         }, 2000);
       }
     } catch (error) {
-      console.log(error);
+      console.log(error.Message);
       setstatus("Verification has been Failed");
     }
   };
